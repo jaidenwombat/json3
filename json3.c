@@ -114,7 +114,6 @@ static void *_alloc(_ParseState *state, size_t amount) {
 #define _peek_ahead(state, ahead) (*((state)->it + (ahead)))
 #define _get(state) (*(state)->it++)
 #define _get_ahead(state, ahead) ((state->it) += ahead)
-#define _get_if(state, pred) ((pred)(_peek(state)) ? _get(state) : '\0')
 #define _get_if_eq(state, c) ((_peek(state) == (c)) ? _get(state) : '\0')
 
 static Json _parse_value(_ParseState *state);

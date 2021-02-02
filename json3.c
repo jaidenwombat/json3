@@ -42,7 +42,7 @@ typedef struct _ParseState {
 	int depth;
 } _ParseState;
 
-static void _create_buffer(_ParseState *state) {
+static bool _create_buffer(_ParseState *state) {
 	int values_estm = 1;
 	int arrays_estm = 0;
 	int objects_estm = 0;
@@ -96,7 +96,12 @@ static void _create_buffer(_ParseState *state) {
 		32
 	);
 	state->buffer_begin = (char*)malloc(buffer_size);
+	if (state->buffer_begin == NULL) {
+		return false;
+	}
 	state->buffer_it = state->buffer_begin;
+	
+	return true;
 }
 
 static void *_alloc(_ParseState *state, size_t amount) {
@@ -495,7 +500,9 @@ static Json _parse_value(_ParseState *state) {
 
 static Json *_parse(_ParseState *state) {
 	state->line = 1;
-	_create_buffer(state);
+	if (!_create_buffer(state)) {
+		return NULL;
+	}
 	Json *json = _alloc_for(state, Json);
 	*json = _parse_value(state);
 	if (json->kind != JSON_ERROR) {
@@ -510,6 +517,9 @@ static Json *_parse(_ParseState *state) {
 Json *json_parse(char const *source_begin, size_t source_length) {
 	_ParseState state;
 	char *begin = (char*)malloc(source_length + 16);
+	if (begin == NULL) {
+		return NULL;
+	}
 	state.it = begin;
 	state.end = begin + source_length;
 	state.depth = 0;
@@ -531,7 +541,12 @@ Json *json_parse_file(char const *path) {
 	fseek(stream, 0, SEEK_SET);
 	
 	char *source_begin = (char*)malloc(source_length + 16);
+	if (source_begin == NULL) {
+		fclose(stream);
+		return NULL;
+	}
 	if (fread(source_begin, 1, source_length, stream) != source_length) {
+		fclose(stream);
 		return NULL;
 	}
 	memset(source_begin + source_length, 0, 16);
@@ -543,5 +558,9 @@ Json *json_parse_file(char const *path) {
 		.end = source_begin + source_length,
 		.depth = 0,
 	};
-	return _parse(&state);
+	Json *result = _parse(&state);
+	
+	free(source_begin);
+	
+	return result;
 }

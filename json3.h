@@ -23,8 +23,8 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _SJSON
-#define _SJSON
+#ifndef _JSON3
+#define _JSON3
 
 #ifdef __cplusplus
 
@@ -82,7 +82,7 @@ struct Json {
 };
 
 struct JsonString {
-	char *value;
+	char *text;
 	size_t size;
 };
 
@@ -128,4 +128,4 @@ Json *json_parse_file(char const *path);
 }
 #endif
 
-#endif // _SJSON
+#endif // _JSON3

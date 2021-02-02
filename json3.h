@@ -83,6 +83,7 @@ struct Json {
 
 struct JsonString {
 	char *text;
+	// The size of the string in BYTES, not characters
 	size_t size;
 };
 
@@ -92,6 +93,7 @@ struct JsonArrayEntry {
 };
 
 struct JsonArray {
+	// The number of items in the array
 	size_t size;
 	JsonArrayEntry *first;
 };
@@ -99,16 +101,20 @@ struct JsonArray {
 struct JsonObjectEntry {
 	JsonObjectEntry *next;
 	char *key;
+	// The size of the key string in BYTES, not characters
 	size_t key_size;
 	Json *value;
 };
 
 struct JsonObject {
+	// The number of items in the object
 	size_t size;
 	JsonObjectEntry *first;
 };
 
 struct JsonError {
+	// A pointer to the beginning of a statically allocated,
+	// null-terminated string representing the error message
 	char const *message;
 	size_t line;
 };

@@ -28,6 +28,8 @@ OTHER DEALINGS IN THE SOFTWARE.
 #include <stdio.h>
 #include <string.h>
 
+#define DEPTH_LIMIT 1000
+
 typedef struct _ParseState {
 	char *it;
 	char const *end;
@@ -36,6 +38,8 @@ typedef struct _ParseState {
 	char *buffer_it;
 	
 	size_t line;
+	
+	int depth;
 } _ParseState;
 
 static void _create_buffer(_ParseState *state) {
@@ -139,7 +143,11 @@ static void _skip_whitespace(_ParseState *state) {
 static Json _parse_number(_ParseState *state) {
 	char *initial_it = state->it;
 	
-	_get_if_eq(state, '-');
+	if (_get_if_eq(state, '-')) {
+		if (!_is_digit(_peek(state))) {
+			return _error(state, "Expected digit after '-'");
+		}
+	}
 	
 	bool small_integer = true;
 	
@@ -221,6 +229,7 @@ static Json _parse_string(_ParseState *state) {
 		char c = _get(state);
 		if (c == '\\') {
 			simple_string = false;
+			_get_if_eq(state, '"');
 		}
 		if (c >= '\0' && c < ' ') {
 			return _error(state,
@@ -260,10 +269,11 @@ static Json _parse_string(_ParseState *state) {
 				case 'u': {
 					unsigned int code_point = 0;
 					for (int i = 0; i < 4; i++) {
-						char c = _to_uppercase(_get(state));
+						char c = _get(state);
 						code_point *= 16;
 						if (_is_digit(c)) code_point += (c - '0');
 						else if (c >= 'A' && c <= 'F') code_point += 10 + (c - 'A');
+						else if (c >= 'a' && c <= 'f') code_point += 10 + (c - 'a');
 						else {
 							return _error(state, "Invalid \\u escape sequence");
 						}
@@ -307,6 +317,9 @@ static Json _parse_string(_ParseState *state) {
 						high_surrogate = 0;
 					}
 					break;
+				}
+				default: {
+					return _error(state, "Invalid escape sequence");
 				}
 				}
 			}
@@ -442,34 +455,40 @@ static Json _parse_value(_ParseState *state) {
 	
 	Json result;
 	
-	char c = _peek(state);
-	if (c == '"') {
-		result = _parse_string(state);
-	}
-	else if (_is_digit(c) || c == '-') {
-		result = _parse_number(state);
-	}
-	else if (c == '{') {
-		result = _parse_object(state);
-	}
-	else if (c == '[') {
-		result = _parse_array(state);
-	}
-	else if (memcmp(state->it, "true", 4) == 0) {
-		_get_ahead(state, 4);
-		result = (Json){JSON_BOOLEAN, .boolean = true};
-	}
-	else if (memcmp(state->it, "false", 5) == 0) {
-		_get_ahead(state, 5);
-		result = (Json){JSON_BOOLEAN, .boolean = false};
-	}
-	else if (memcmp(state->it, "null", 4) == 0) {
-		_get_ahead(state, 4);
-		result = (Json){JSON_NULL};
+	if (state->depth++ > DEPTH_LIMIT) {
+		result = _error(state, "Depth limit reached");
 	}
 	else {
-		result = _error(state, "Unexpected character");
+		char c = _peek(state);
+		if (c == '"') {
+			result = _parse_string(state);
+		}
+		else if (_is_digit(c) || c == '-') {
+			result = _parse_number(state);
+		}
+		else if (c == '{') {
+			result = _parse_object(state);
+		}
+		else if (c == '[') {
+			result = _parse_array(state);
+		}
+		else if (memcmp(state->it, "true", 4) == 0) {
+			_get_ahead(state, 4);
+			result = (Json){JSON_BOOLEAN, .boolean = true};
+		}
+		else if (memcmp(state->it, "false", 5) == 0) {
+			_get_ahead(state, 5);
+			result = (Json){JSON_BOOLEAN, .boolean = false};
+		}
+		else if (memcmp(state->it, "null", 4) == 0) {
+			_get_ahead(state, 4);
+			result = (Json){JSON_NULL};
+		}
+		else {
+			result = _error(state, "Unexpected character");
+		}
 	}
+	state->depth--;
 	
 	return result;
 }
@@ -493,6 +512,7 @@ Json *json_parse(char const *source_begin, size_t source_length) {
 	char *begin = (char*)malloc(source_length + 16);
 	state.it = begin;
 	state.end = begin + source_length;
+	state.depth = 0;
 	memcpy(state.it, source_begin, source_length);
 	memset(state.it + source_length, 0, 16);
 	Json *result = _parse(&state);
@@ -521,6 +541,7 @@ Json *json_parse_file(char const *path) {
 	_ParseState state = {
 		.it = source_begin,
 		.end = source_begin + source_length,
+		.depth = 0,
 	};
 	return _parse(&state);
 }

@@ -28,6 +28,10 @@ int main() {
   
 	Json *json = json_parse(text, strlen(text));
 	// Alternatively you can use `json_parse_file(char const *path)`
+	if (json == NULL) {
+		fputs("malloc failed or file stream couldn't be opened", stderr);
+		return 1;
+	}
 	if (json_is_error(json)) {
 		fprintf(stderr, "JSON error on line %i: %s\n", (int)json->error->line, json->error->message);
 		return 1;

@@ -324,7 +324,7 @@ static Json _parse_string(_ParseState *state) {
 	begin[length] = '\0';
 	
 	JsonString *value = _alloc_for(state, JsonString);
-	value->value = begin;
+	value->text = begin;
 	value->size = length;
 	
 	return (Json){JSON_STRING, .string = value};
@@ -410,7 +410,7 @@ static Json _parse_object(_ParseState *state) {
 				return value;
 			}
 			
-			entry->key = key.string->value;
+			entry->key = key.string->text;
 			entry->key_size = key.string->size;
 			entry->value = _alloc_for(state, Json);
 			*entry->value = value;

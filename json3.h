@@ -23,8 +23,8 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _JSON3
-#define _JSON3
+#ifndef JSON4
+#define JSON4
 
 #ifdef __cplusplus
 
@@ -134,4 +134,4 @@ Json *json_parse_file(char const *path);
 }
 #endif
 
-#endif // _JSON3
+#endif // JSON4

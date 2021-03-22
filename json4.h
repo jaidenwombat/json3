@@ -120,6 +120,14 @@ struct JsonError {
 Json *json_parse(char const *source_begin, size_t source_length);
 Json *json_parse_file(char const *path);
 
+#define json_is_null(json) ((json)->kind == JSON_NULL)
+#define json_is_boolean(json) ((json)->kind == JSON_BOOLEAN)
+#define json_is_number(json) ((json)->kind == JSON_NUMBER)
+#define json_is_string(json) ((json)->kind == JSON_STRING)
+#define json_is_array(json) ((json)->kind == JSON_ARRAY)
+#define json_is_object(json) ((json)->kind == JSON_OBJECT)
+#define json_is_error(json) ((json)->kind == JSON_ERROR)
+
 #ifdef __cplusplus
 }
 #endif

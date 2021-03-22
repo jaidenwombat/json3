@@ -29,7 +29,7 @@ int main() {
 	Json *json = json_parse(text, strlen(text));
 	// Alternatively you can use `json_parse_file(char const *path)`
 	if (json == NULL) {
-		fputs("file stream couldn't be opened (if `json_parse_file` was used) or malloc failed", stderr);
+		fputs("malloc failed (or file stream couldn't be opened if `json_parse_file` was used)", stderr);
 		return 1;
 	}
 	if (json_is_error(json)) {

@@ -42,8 +42,6 @@ struct JsonError;
 #include <stdlib.h>
 #include <stdbool.h>
 
-typedef enum JsonExtension JsonExtension;
-
 typedef enum JsonKind JsonKind;
 typedef struct Json Json;
 
@@ -83,7 +81,7 @@ struct Json {
 
 struct JsonString {
 	char *text;
-	// The size of the string in BYTES, not characters
+	// The size of the string in bytes
 	size_t size;
 };
 
@@ -101,7 +99,7 @@ struct JsonArray {
 struct JsonObjectEntry {
 	JsonObjectEntry *next;
 	char *key;
-	// The size of the key string in BYTES, not characters
+	// The size of the key string in bytes
 	size_t key_size;
 	Json *value;
 };
@@ -113,22 +111,14 @@ struct JsonObject {
 };
 
 struct JsonError {
-	// A pointer to the beginning of a statically allocated,
-	// null-terminated string representing the error message
+	// A pointer to the beginning of a statically allocated
+	// null-terminated string containing the error message
 	char const *message;
 	size_t line;
 };
 
 Json *json_parse(char const *source_begin, size_t source_length);
 Json *json_parse_file(char const *path);
-
-#define json_is_null(json) ((json)->kind == JSON_NULL)
-#define json_is_boolean(json) ((json)->kind == JSON_BOOLEAN)
-#define json_is_number(json) ((json)->kind == JSON_NUMBER)
-#define json_is_string(json) ((json)->kind == JSON_STRING)
-#define json_is_array(json) ((json)->kind == JSON_ARRAY)
-#define json_is_object(json) ((json)->kind == JSON_OBJECT)
-#define json_is_error(json) ((json)->kind == JSON_ERROR)
 
 #ifdef __cplusplus
 }

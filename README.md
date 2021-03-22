@@ -40,7 +40,7 @@ int main() {
 	char const *name;
 	char const *species;
 	double age;
-	bool likes_to_pee_on_carpet; // <stdbool.h> is included by "json3.h" if you're not using c++
+	bool likes_to_pee_on_carpet; // <stdbool.h> is included by "json4.h" if you're not using c++
 	char const *friends[3];
 	
 	for (

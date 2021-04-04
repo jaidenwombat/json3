@@ -111,8 +111,7 @@ struct JsonObject {
 };
 
 struct JsonError {
-	// A pointer to the beginning of a statically allocated
-	// null-terminated string containing the error message
+	// Null terminated message string
 	char const *message;
 	size_t line;
 };
